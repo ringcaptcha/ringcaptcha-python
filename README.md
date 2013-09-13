@@ -1,46 +1,76 @@
-# Welcome to Ringcaptcha-python repository!
+# Using Ringcaptcha widget on your Website
 
-With the ringcaptcha-python library, we've simplified interaction with the Ringcaptcha verification REST API. No need to manually create URLS or parse XML/JSON. You now interact with resources directly.
-
-This guide will help you through the setup of Ringcaptcha on your website or mobile application. Should you find any issues or would like to make any comments please do so in the [Issues](http://bitbucket.org/ringcaptcha/ringcaptcha-python/issues) tab. Thanks!
-
-## Creating a widget
-
-Register a new site to match the domain that the widget will be placed on. The embed code, with a unique site key, will be created for you.
-
-```
-#!javascript
-<script type='text/javascript' charset='UTF-8' src='http(s)://api.ringcaptcha.com/XXXXXXXXX/widget'></script>
-
-```
+Register or Log-in to the [Ringcaptcha.com](http://ringcaptcha.com) site and create a new widget matching the domain or mobile application name it will be placed on. It is important that the name is exactly as shown on the URL bar or on the respective App Stores for the widget to work correctly, any mistake can lead to unexpected errors. Select the default service to use for PIN code requests, and activate desired features. An embed code, with a unique app key, will be created for you automatically.
 
 ## Installing your widget on your website
 
-To embed the widget, simply paste the embed code into your HTML. The widget will be rendered in the spot where the code is placed.
+To embed the widget, simply paste the embed code into your HTML. The widget will be rendered in the spot where the code is placed. Replace the _XXXXXXXXX_ with the APPLICATION KEY of the service you intend on using.
+
+    #!javascript
+    <script type='text/javascript' charset='UTF-8' src='//api.ringcaptcha.com/widget/XXXXXXXXX'></script>
+
+The Javascript loads asynchronously by default. Should you want to display the widget on a different position rather than the position of where the script tag is placed, you need to add the following html element somewhere on the HTML:
+
+	#!javascript
+    <div id='ringcaptcha_widget' style='display:none'></div> 
+
+The widget allows the language to be hardcoded by specifying it on a Javascript variable called: _RingcaptchaOptions_. It also emits events per action for which the webmaster can listen to and act accordingly. For details please refer below example:
+
+	#!javascript
+    <script type='text/javascript'>
+	var RingcaptchaOptions = {
+		‘lang’ : ‘es’,
+		‘events’ : {
+			‘onWidgetDisplayed’ : function () {},
+			‘onWaitingForPinCode’ : function () {},
+			‘onRetryRequested’ : function () {},
+			‘onSuccessfulPinRequestSent’ : function () {},
+			‘onInvalidNumberEntered’ : function () {},
+		}
+	}
+	</script>
+
+
+> _Note: For the service to work correctly, it must be used under “**localhost**” domain or under a subdomain of the one configured for the widget in Ringcaptcha site._
 
 ## Ending the verification loop
 
-1. Clone this repository on yours and add a reference to it in your php code.
+Clone any of our PHP, Python, Java, Ruby, C# or Node.js repositories on yours and add a reference to it in your code.
 
+    #!bash
+    git clone https://[user]@bitbucket.org/ringcaptcha/ringcaptcha-python.git
 
-```
-#!bash
+Integrate within your form verification code. Example below:
 
-git clone https://[user]@bitbucket.org/ringcaptcha/ringcaptcha-python.git
-```
+	#!python
+	from lib.Ringcaptcha import Ringcaptcha
 
-2. Integrate within your form verification code.
+	lib = Ringcaptcha('XXXX','YYYY')
+	if lib.isValid('1234 ','efkwnof2345i43it43ot435'):
+		print 'Is valid ' +	lib.getPhoneNumer() + ' ' + lib.isGeoLocated() + ' with id: ' + lib.getId()
+	else:
+		print 'Invalid ' + lib.getMessage()
 
+There are available SDKs in different languages you can use here: [PHP](https://bitbucket.org/ringcaptcha/ringcaptcha-php/src), [Python](https://bitbucket.org/ringcaptcha/ringcaptcha-python/src), [C#](https://bitbucket.org/ringcaptcha/ringcaptcha-c#/src), [Ruby](https://bitbucket.org/ringcaptcha/ringcaptcha-ruby/src) and [Node.js](https://bitbucket.org/ringcaptcha/ringcaptcha-nodejs/src). 
 
-```
-#!python
+Should there not be an available SDK in your language, you are allowed to write your own. Following are the docs for the 1.0 API Verification endpoint:
 
-from lib.Ringcaptcha import Ringcaptcha
+	#!bash
+	>> Request:
+	POST https://api.ringcaptcha.com/${app_key}/verify
+	Content-Type: application/x-www-url-encoded
+	app_key={Your application key}&secret_key={Your Secret key}&token={Active token}&code={4 digit PIN code}
 
-lib = Ringcaptcha('XXXX','YYYY')
-if lib.isValid('1234 ','efkwnof2345i43it43ot435'):
-	print 'Is valid ' +	lib.getPhoneNumer() + ' ' + lib.isGeoLocated() + ' with id: ' + lib.getId()
-else:
-	print 'Invalid ' + lib.getMessage()
+	<< Response:
+	{"id":"Transaction ID", "status":"SUCCESS or ERROR", "message":"Error code when Status is ERROR", "phone":"Cleansed phone number", "geolocation":"Information about the geo-location of the phone if possible and feature enabled", "threat_level":"an indicator detailing the transaction threat level. (e.g.: low, medium or high)", "phone_type":"LANDLINE, MOBILE, VOIP, etc", "carrier":"name of carrier"}
 
-```
+Example:
+
+	#!bash
+	>> Request:
+	curl --data "token=XXXXYYYYZZZZAAAABBBB&code=1234&secret_key=XXXXXXXXXXXXXXXXXXXX" https://api.ringcaptcha.com/YYYYYYYYYYYYYYYYYY/verify
+
+	<< Response:
+	{"status":"SUCCESS","id":"UUUUUUUUUUUUUUU","phone":"+5491112345678","geolocation":0, "phone_type":"MOBILE","carrier":"Claro","threat_level":"LOW"}
+
+Refer to the [ERROR Codes](https://bitbucket.org/ringcaptcha/ringcaptcha-docs/src/b8ef094514ac8613a73796407dcb02d17746d588/api?at=master) reference on the API docs.
