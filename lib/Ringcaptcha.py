@@ -7,7 +7,7 @@ import urllib, urllib2, json, sys
 #
 # @package Ringcaptcha
 # @author  Martin Cocaro <martin@ringcaptcha.com>
-# @license http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License
+# @license Apache 2.0
 # @link    http://ringcaptcha.com/
 '''
 
